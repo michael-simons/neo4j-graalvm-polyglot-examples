@@ -1,0 +1,20 @@
+plugins {
+	id 'java'
+}
+
+group = 'org.neo4j.examples'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.neo4j.driver:neo4j-java-driver:4.0.0'
+}
+
+task downloadDependencies(type: Copy) {
+  from configurations.default
+  into 'lib'
+}
