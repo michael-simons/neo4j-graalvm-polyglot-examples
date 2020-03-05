@@ -1,27 +1,28 @@
-# Add the necessary dependencies
-# Download them beforehand via the provided gradle task (see README.md)
-# graalpython --jvm neo4j-graalvm-python-example.py 
-# --vm.cp=lib/neo4j-java-driver-4.0.0.jar:lib/reactive-streams-1.0.2.jar
 import java
-import os
 
-java.add_to_classpath("lib/reactive-streams-1.0.2.jar")
-java.add_to_classpath("lib/neo4j-java-driver-4.0.0.jar")
+# Alternative way to add Java libraries to GraalVM from JavaScript
+# java.add_to_classpath("lib/reactive-streams-1.0.2.jar")
+# java.add_to_classpath("lib/neo4j-java-driver-4.0.0.jar")
 
-# Open up a connection
+# This brings in the required classes
 graphDatabase = java.type('org.neo4j.driver.GraphDatabase')
 authTokens = java.type('org.neo4j.driver.AuthTokens')
 config = java.type('org.neo4j.driver.Config')
+
+# This is a call to the static factory method named `driver`
 driver = graphDatabase.driver('bolt://localhost:7687', authTokens.basic('neo4j', 'secret'), config.defaultConfig())
 
+# Python dicts are not (yet?) automatically converted to Java maps, so we need to use Neo4j's Values for building parameters
+values = java.type('org.neo4j.driver.Values')
+
 def findConnections(driver):
-    query="""
-        MATCH (:Person {name:"Tom Hanks"})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActor)
+    query = """
+        MATCH (:Person {name:$name})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActor) 
         RETURN DISTINCT coActor
     """
 
     session = driver.session()
-    records = session.run(query).list()
+    records = session.run(query, values.parameters("name", "Tom Hanks")).list()
 
     coActors = [r.get('coActor').get('name').asString() for r in records]
     
@@ -32,6 +33,5 @@ results = findConnections(driver)
 
 for name in results: 
     print(name)
-
 
 driver.close()

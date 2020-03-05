@@ -1,22 +1,24 @@
-/*
- Download the jars beforehand via the provided gradle task (see README.md)
- node OR js --jvm --vm.cp=lib/neo4j-java-driver-4.0.0.jar:lib/reactive-streams-1.0.2.jar neo4j-graalvm-javascript-example.js 
-*/
+// Alternative way to add Java libraries to GraalVM from JavaScript
+Java.addToClasspath("lib/reactive-streams-1.0.2.jar")
+Java.addToClasspath("lib/neo4j-java-driver-4.0.0.jar")
 
-// Open up a connection
+// This brings in the required classes
 const GraphDatabase = Java.type('org.neo4j.driver.GraphDatabase')
 const AuthTokens = Java.type('org.neo4j.driver.AuthTokens')
 const Config = Java.type('org.neo4j.driver.Config')
+
+// This is a call to the static factory method named `driver`
 const driver = GraphDatabase.driver('bolt://localhost:7687', AuthTokens.basic('neo4j', 'secret'), Config.defaultConfig())
 
 function findConnections(driver) {
-    const query=`
-        MATCH (:Person {name:"Tom Hanks"})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActor)
+    const query = `
+        MATCH (:Person {name:$name})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActor) 
         RETURN DISTINCT coActor
     `
 
     const session = driver.session()
-    const records = session.run(query).list()
+    // The JavaScript map is automatically converted to a Java Map 
+    const records = session.run(query, {name: 'Tom Hanks'}).list()
 
     const coActors = Java.from(records).map(r => r.get('coActor').get('name').asString())
     session.close()

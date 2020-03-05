@@ -1,21 +1,25 @@
-# Download dependencies beforehand via the provided gradle task (see README.md)
+# Alternative way to add Java libraries to GraalVM from R
+# java.addToClasspath("lib/reactive-streams-1.0.2.jar")
+# java.addToClasspath("lib/neo4j-java-driver-4.0.0.jar")
 
-# Open up a connection
+# This brings in the required classes
 graphDatabase <- java.type('org.neo4j.driver.GraphDatabase')
 authTokens <- java.type('org.neo4j.driver.AuthTokens')
 config <- java.type('org.neo4j.driver.Config')
+
+# This is a call to the static factory method named `driver`
 driver <- graphDatabase$driver('bolt://localhost:7687', authTokens$basic('neo4j', 'secret'), config$defaultConfig())
 
 findConnections <- function (driver) {
     
     query <- '
-        MATCH (tom:Person {name:"Tom Hanks"})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActor),
-              (coActor)-[:ACTED_IN]->(m2)<-[:ACTED_IN]-(cruise:Person {name:"Tom Cruise"})
+        MATCH (:Person {name:$name})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActor) 
         RETURN DISTINCT coActor
     '
 
     session <- driver$session()
-    coActorsRecords <- session$run(query)$list()
+    # The R list (which behaves like an associative array) is automatically converted to a Java Map 
+    coActorsRecords <- session$run(query, list(name="Tom Hanks"))$list()
 
     coActors <- list()
     i <- 1

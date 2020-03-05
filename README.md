@@ -66,6 +66,15 @@ gradlew.bat downloadDependencies
 
 ## Run Examples
 
+All examples follow the same pattern:
+Open up a connection, execute a query with a parameter, collect the results.
+They include as first instructions an alternative method to the required Neo4j dependencies loaded.
+This works through the GraalVM interoperability API.
+
+We decided it would feel more natural not to do this and instead specify the two required jars on the GraalVM classpath with the `--vm.cp` argument as shown below.
+
+All examples answer the question which actors acted with Tom Hanks in the same movie.
+
 ```
 export CLASSPATH=lib/neo4j-java-driver-4.0.0.jar:lib/reactive-streams-1.0.2.jar
 
