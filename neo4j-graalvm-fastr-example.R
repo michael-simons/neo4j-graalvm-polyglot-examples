@@ -1,7 +1,4 @@
-# Add the necessary dependencies
-# Download them beforehand via the provided gradle task (see README.md)
-java.addToClasspath("lib/reactive-streams-1.0.2.jar")
-java.addToClasspath("lib/neo4j-java-driver-4.0.0.jar")
+# Download dependencies beforehand via the provided gradle task (see README.md)
 
 # Open up a connection
 graphDatabase <- java.type('org.neo4j.driver.GraphDatabase')
