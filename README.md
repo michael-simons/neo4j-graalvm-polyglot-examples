@@ -3,7 +3,7 @@
 Start a Neo4j Docker instance
 
 ```
-docker run --publish=7474:7474 --publish=7687:7687 -e 'NEO4J_AUTH=neo4j/secret' -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes neo4j:4.0.1
+docker run --publish=7474:7474 --publish=7687:7687 -e 'NEO4J_AUTH=neo4j/secret' neo4j:4.0.1
 ```
 
 ## Installing GraalVM
@@ -76,7 +76,7 @@ We decided it would feel more natural not to do this and instead specify the two
 All examples answer the question which actors acted with Tom Hanks in the same movie.
 
 ```
-export CLASSPATH=lib/neo4j-java-driver-4.0.0.jar:lib/reactive-streams-1.0.2.jar
+export CLASSPATH=./lib/neo4j-java-driver-4.0.0.jar:./lib/reactive-streams-1.0.2.jar
 
 # R
 $GRAALVM_HOME/bin/Rscript --jvm --vm.cp=$CLASSPATH neo4j-graalvm-fastr-example.R
@@ -91,3 +91,14 @@ $GRAALVM_HOME/bin/graalpython --jvm --vm.cp=$CLASSPATH neo4j-graalvm-python-exam
 $GRAALVM_HOME/bin/truffleruby --jvm --vm.cp=$CLASSPATH neo4j-graalvm-ruby-example.rb
 ```
 
+The examples also exists with `multidb` in their name.
+They are identical, but make use of Neo4j 4.0 multi database feature.
+As this is only available in the enterprise edition of Neo4j, you need to use a different docker image to start your instance:
+
+```
+docker run --publish=7474:7474 --publish=7687:7687 -e 'NEO4J_AUTH=neo4j/secret'  --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes neo4j:4.0.1-enterprise                   
+```
+
+The `ee` examples run against a database called `movies`.
+
+If you use Neo4j desktop, the enterprise edition is included.
