@@ -10,7 +10,14 @@ authTokens = java.type('org.neo4j.driver.AuthTokens')
 config = java.type('org.neo4j.driver.Config')
 
 # This is a call to the static factory method named `driver`
-driver = graphDatabase.driver('bolt://localhost:7687', authTokens.basic('neo4j', 'secret'), config.defaultConfig())
+driver = graphDatabase.driver(
+    'bolt://localhost:7687', 
+    authTokens.basic('neo4j', 'secret'), 
+    config.builder()
+        .withMaxConnectionPoolSize(1) # Don't need a bigger pool size for a script
+        # .withEncryption() # Uncomment this if you want to connect against https://neo4j.com/aura/
+        .build()
+)
 
 # Python dicts are not (yet?) automatically converted to Java maps, so we need to use Neo4j's Values for building parameters
 values = java.type('org.neo4j.driver.Values')

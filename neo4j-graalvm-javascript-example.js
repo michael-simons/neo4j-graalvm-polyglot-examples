@@ -8,16 +8,23 @@ const AuthTokens = Java.type('org.neo4j.driver.AuthTokens')
 const Config = Java.type('org.neo4j.driver.Config')
 
 // This is a call to the static factory method named `driver`
-const driver = GraphDatabase.driver('bolt://localhost:7687', AuthTokens.basic('neo4j', 'secret'), Config.defaultConfig())
+const driver = GraphDatabase.driver(
+    'bolt://localhost:7687',
+    AuthTokens.basic('neo4j', 'secret'),
+    Config.builder()
+        .withMaxConnectionPoolSize(1) // Don't need a bigger pool size for a script
+        // .withEncryption() // Uncomment this if you want to connect against https://neo4j.com/aura/
+        .build()
+)
 
 function findConnections(driver) {
     const query = `
-        MATCH (:Person {name:$name})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActor) 
+        MATCH (:Person {name:$name})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActor)
         RETURN DISTINCT coActor
     `
 
     const session = driver.session()
-    // The JavaScript map is automatically converted to a Java Map 
+    // The JavaScript map is automatically converted to a Java Map
     const records = session.run(query, {name: 'Tom Hanks'}).list()
 
     const coActors = Java.from(records).map(r => r.get('coActor').get('name').asString())
